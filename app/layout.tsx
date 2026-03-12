@@ -12,7 +12,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const url = "https://moemen-portfolio.netlify.app"
+const url = "https://moemen-elsayeh.netlify.app"
 const title = "Moemen Ali — Frontend Engineer"
 const description =
   "Senior Frontend Engineer with 4+ years building large-scale Angular apps. Explore my projects, skills, and experience — right from the terminal."
