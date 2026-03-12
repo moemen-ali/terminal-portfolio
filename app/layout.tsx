@@ -27,12 +27,14 @@ export const metadata: Metadata = {
     title,
     description,
     siteName: "Moemen Ali Portfolio",
+    images: [{ url: "/preview.png", width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
     title,
     description,
     creator: "@moemenelsayeh",
+    images: ["/preview.png"],
   },
 };
 
