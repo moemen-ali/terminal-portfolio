@@ -23,6 +23,12 @@ The terminal manages an explicit `mode` field that controls how keyboard input i
 
 ---
 
+## Dependencies
+
+`fast-levenshtein` is already in `node_modules` but ships no TypeScript types and has no `@types` package. **Replace it with `fastest-levenshtein`**, which ships its own type declarations. This requires running `npm install fastest-levenshtein`.
+
+---
+
 ## State
 
 Added to `PortfolioTerminal`:
@@ -30,12 +36,17 @@ Added to `PortfolioTerminal`:
 | Field | Type | Purpose |
 |---|---|---|
 | `mode` | `'normal' \| 'awaiting-confirmation'` | Controls keyboard interpretation |
-| `dropdownOpen` | `boolean` | Whether the autocomplete dropdown is visible |
 | `dropdownIndex` | `number` | Highlighted index in the dropdown (-1 = none) |
 | `pendingTypo` | `string \| null` | The suggested correction when in `awaiting-confirmation` mode |
 
+**`dropdownOpen` is not stored as state.** It is derived: the dropdown is open when `mode === 'normal'` AND `filteredCommands.length > 0` AND `currentCommand.length > 0`. This avoids sync bugs between an explicit flag and the derived list.
+
 Derived (not stored):
-- `filteredCommands` — `Object.keys(commands)` filtered by `currentCommand` prefix/substring
+- `filteredCommands` — `Object.keys(commands)` filtered by **prefix match** against `currentCommand` (i.e., `cmd.startsWith(currentCommand.toLowerCase())`). Prefix match is more natural for a terminal — `"ex"` matches `"experience"` but not `"clear"`.
+
+### History entries
+
+The `HistoryEntry` type gains an optional `isSystem: boolean` field to tag entries added by the terminal itself (welcome message, typo prompts) as distinct from user-submitted commands. History navigation (ArrowUp/ArrowDown) skips entries where `isSystem === true`.
 
 ---
 
@@ -49,9 +60,10 @@ Single exported function:
 findClosestCommand(input: string, commands: string[]): string | null
 ```
 
-- Uses `fast-levenshtein` (already in `node_modules`)
+- Uses `fastest-levenshtein`
+- Excludes `"clear"` from candidates — `clear` wipes all history and would be a destructive surprise if triggered by typo correction
 - Returns the command with the lowest edit distance if that distance is ≤ 3
-- Returns `null` if no command is close enough
+- Returns `null` if no command is close enough or if input is empty
 
 ### `components/ui/CommandDropdown.tsx`
 
@@ -63,6 +75,8 @@ Props:
 - `onSelect: (cmd: string) => void` — called on click or Enter
 - `onHover: (index: number) => void` — called on mouse enter per item
 
+ARIA: `role="listbox"` on the container, `role="option"` and `aria-selected` on each item. The input receives `aria-expanded` and `aria-activedescendant` when the dropdown is open. (Full ARIA compliance for screen readers is out of scope but these baseline attributes are included.)
+
 ### `components/ui/NavigableCommandList.tsx`
 
 Reusable interactive command list. Used inside `HelpSection` output.
@@ -70,8 +84,21 @@ Reusable interactive command list. Used inside `HelpSection` output.
 Props:
 - `commands: string[]` — list of command names to display
 - `onSelect: (cmd: string) => void` — called on click
+- `disabled?: boolean` — when `true`, click handlers are no-ops (used when terminal is in `awaiting-confirmation` mode)
 
 Each item renders as a clickable row. No keyboard navigation (arrow keys in history would conflict with command history navigation — keyboard nav is only in the live input area).
+
+---
+
+## Component Changes
+
+| File | Change |
+|---|---|
+| `interactive-portfolio-terminal-component.tsx` | Add `mode`, `dropdownIndex`, `pendingTypo` state; derive dropdown open from `filteredCommands`; update `handleKeyDown`; render `CommandDropdown` above input; expose `runCommand` callback; pass `commands` list and `onCommandSelect` to `HelpSection`; tag system history entries with `isSystem: true` |
+| `terminal-sections/HelpSection.tsx` | Accept `commands: string[]` and `onCommandSelect: (cmd: string) => void` props; render `NavigableCommandList` instead of static hardcoded list |
+| `lib/fuzzy-match.ts` | New file |
+| `components/ui/CommandDropdown.tsx` | New file |
+| `components/ui/NavigableCommandList.tsx` | New file |
 
 ---
 
@@ -81,59 +108,50 @@ Each item renders as a clickable row. No keyboard navigation (arrow keys in hist
 
 | Key | Behavior |
 |---|---|
-| Any character | Updates input, re-filters dropdown, opens dropdown if ≥1 match |
-| `ArrowDown` | Moves `dropdownIndex` down through filtered list |
-| `ArrowUp` | Moves `dropdownIndex` up through filtered list (or into command history if dropdown closed) |
-| `Tab` | Fills input with `filteredCommands[0]`, closes dropdown |
-| `Enter` | If `dropdownIndex ≥ 0` → run highlighted command. Else → run `currentCommand` normally |
-| `Escape` | Closes dropdown, resets `dropdownIndex` to -1 |
+| Any character | Updates input, re-computes `filteredCommands`, dropdown opens if ≥1 prefix match |
+| `ArrowDown` | If dropdown open: move `dropdownIndex` down (clamp at last item, no wrap). If dropdown closed: no-op (ArrowDown in history is only activated when input is empty — existing behavior unchanged) |
+| `ArrowUp` | If dropdown open AND `dropdownIndex > 0`: move up. If dropdown open AND `dropdownIndex === 0`: close dropdown (reset `dropdownIndex` to -1), re-enable history navigation. If dropdown closed: existing history navigation behavior |
+| `Tab` | If `filteredCommands.length > 0`: fill input with `filteredCommands[0]`, reset `dropdownIndex` to -1 (dropdown closes because input now fully matches). If `filteredCommands` is empty: no-op |
+| `Enter` | If `dropdownIndex ≥ 0`: run `filteredCommands[dropdownIndex]`. Else: run `currentCommand` normally (may trigger typo detection) |
+| `Escape` | If dropdown open: close dropdown, reset `dropdownIndex` to -1. If dropdown closed: no-op |
 
 ### On Enter with unknown command (no dropdown selection)
 
-1. Call `findClosestCommand(input, knownCommands)`
-2. **Match found:** append `"Did you mean X? (y/n)"` to history, set `mode = 'awaiting-confirmation'`, set `pendingTypo = match`
+1. Call `findClosestCommand(input, knownCommands)` (excludes `clear`)
+2. **Match found:** append a system history entry `"Did you mean \`X\`? (y/n)"` (tagged `isSystem: true`), set `mode = 'awaiting-confirmation'`, set `pendingTypo = match`
 3. **No match:** show existing "Command not found" error, stay in normal mode
 
 ### Awaiting-confirmation mode
 
-Input is visually replaced by a `[y/n]` indicator. The input field remains mounted but its `onKeyDown` routes all keys through confirmation logic.
+The input field remains mounted and focused. It is set to `readOnly` with `placeholder="[y/n]"` and styled to communicate it is in a special state (e.g., dim the text cursor, show a yellow border). This keeps focus management simple — no DOM swapping required.
 
 | Key | Behavior |
 |---|---|
-| `y` or `Enter` | Run `pendingTypo` command, return to normal mode, clear `pendingTypo` |
-| `n` or `Escape` | Run `help` command (append its output to history), return to normal mode |
+| `y` or `Enter` | Run `pendingTypo` command, return to `normal` mode, clear `pendingTypo`, clear `currentCommand` |
+| `n` or `Escape` | Append `help` output to history (tagged `isSystem: true`), return to `normal` mode, clear `pendingTypo` |
 | Any other key | Ignored |
 
 ### Help list — click interaction
 
-- Each command name in `HelpSection` output is wrapped in `NavigableCommandList`
-- Clicking fires `onSelect(cmd)` which calls the parent's `runCommand(cmd)` function
+- Each command name in `HelpSection` output uses `NavigableCommandList`
+- Clicking fires `onSelect(cmd)` which calls `runCommand(cmd)` in the parent
+- When `mode === 'awaiting-confirmation'`, `NavigableCommandList` receives `disabled={true}` — clicks are ignored
 - Arrow keys do **not** navigate the help list in history (would conflict with existing arrow-key command history behavior)
-
----
-
-## Component Changes
-
-| File | Change |
-|---|---|
-| `interactive-portfolio-terminal-component.tsx` | Add `mode`, `dropdownOpen`, `dropdownIndex`, `pendingTypo` state; update `handleKeyDown`; render `CommandDropdown` above input; expose `runCommand` callback |
-| `terminal-sections/HelpSection.tsx` | Accept `onCommandSelect` prop; render `NavigableCommandList` instead of static list |
-| `lib/fuzzy-match.ts` | New file |
-| `components/ui/CommandDropdown.tsx` | New file |
-| `components/ui/NavigableCommandList.tsx` | New file |
 
 ---
 
 ## Error Handling
 
 - `findClosestCommand` returns `null` for empty input — no suggestion shown
-- If `pendingTypo` somehow resolves to an unknown command (defensive), fall back to "Command not found" output
+- `clear` is excluded from typo suggestions — it is destructive and should never be triggered accidentally
+- If `pendingTypo` somehow resolves to an unknown command (defensive), fall back to "Command not found" output and reset mode
 - Dropdown does not open if `currentCommand` is empty
 
 ---
 
 ## Out of Scope
 
-- Fuzzy matching inside the dropdown (dropdown uses prefix/substring filter only; fuzzy is only for post-submit typo detection)
+- Fuzzy matching inside the dropdown (dropdown uses prefix filter only; fuzzy is only for post-submit typo detection)
+- Full screen-reader ARIA compliance for `CommandDropdown` (baseline attributes included)
 - Keyboard navigation of help list in history output
 - Persisting autocomplete preferences
