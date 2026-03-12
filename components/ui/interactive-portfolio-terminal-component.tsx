@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect, useMemo, useCallback, type ReactNode } from 'react'
+import { useState, useRef, useEffect, useMemo, type ReactNode } from 'react'
 import { WelcomeSection } from './terminal-sections/WelcomeSection'
 import { HelpSection } from './terminal-sections/HelpSection'
 import { AboutSection } from './terminal-sections/AboutSection'
@@ -42,7 +42,7 @@ export default function PortfolioTerminal() {
     { command: '/welcome', output: <WelcomeSection />, isSystem: true },
   ])
   const [currentCommand, setCurrentCommand] = useState('')
-  const [historyIndex, setHistoryIndex] = useState(-1)
+  const [, setHistoryIndex] = useState(-1)
   const [mode, setMode] = useState<Mode>('normal')
   const [dropdownIndex, setDropdownIndex] = useState(-1)
   const [pendingTypo, setPendingTypo] = useState<string | null>(null)
@@ -63,10 +63,8 @@ export default function PortfolioTerminal() {
 
   const dropdownOpen = mode === 'normal' && filteredCommands.length > 0 && currentCommand.length > 0
 
-  // runCommand — stable reference (useCallback with [] deps).
-  // Uses a ref to access setHistory/setCurrentCommand/etc without listing them as deps.
-  // 'help' and 'clear' are handled inline; all other commands delegate to STATIC_COMMANDS.
-  const runCommand = useCallback((cmd: string) => {
+  // runCommand — 'help' and 'clear' are handled inline; all other commands delegate to STATIC_COMMANDS.
+  const runCommand = (cmd: string) => {
     if (cmd === 'clear') {
       // clear resets history directly — no history entry added.
       setHistory([{ command: '/welcome', output: <WelcomeSection />, isSystem: true }])
@@ -98,7 +96,7 @@ export default function PortfolioTerminal() {
     setCurrentCommand('')
     setDropdownIndex(-1)
     setHistoryIndex(-1)
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }
 
   const handleCommand = () => {
     const cmd = currentCommand.trim().toLowerCase()
@@ -317,7 +315,6 @@ export default function PortfolioTerminal() {
               }`}
               autoFocus
               spellCheck="false"
-              aria-expanded={dropdownOpen}
               aria-autocomplete="list"
             />
             <span className="text-green-400 animate-pulse">█</span>
