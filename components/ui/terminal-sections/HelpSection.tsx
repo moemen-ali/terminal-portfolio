@@ -1,3 +1,6 @@
+// components/ui/terminal-sections/HelpSection.tsx
+import { NavigableCommandList } from '../NavigableCommandList'
+
 const helpCommands = [
   { cmd: 'about',      desc: 'Display personal information' },
   { cmd: 'projects',   desc: 'View project portfolio' },
@@ -9,16 +12,19 @@ const helpCommands = [
   { cmd: 'help',       desc: 'Display this help message' },
 ]
 
-export function HelpSection() {
+type Props = {
+  onCommandSelect?: (cmd: string) => void
+}
+
+export function HelpSection({ onCommandSelect }: Props) {
   return (
     <div className="space-y-1">
       <p className="text-green-400 font-bold mb-2">[AVAILABLE_COMMANDS]</p>
-      {helpCommands.map(({ cmd, desc }) => (
-        <div key={cmd} className="flex gap-4">
-          <span className="text-cyan-400 w-24 shrink-0">{cmd}</span>
-          <span className="text-gray-300">{desc}</span>
-        </div>
-      ))}
+      <NavigableCommandList
+        commands={helpCommands}
+        onSelect={cmd => onCommandSelect?.(cmd)}
+        disabled={!onCommandSelect}
+      />
     </div>
   )
 }
