@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 const url = "https://moemen-elsayeh.netlify.app"
-const title = "Moemen Ali — Frontend Engineer"
+const title = "Mo'men El-Sayeh — Frontend Engineer"
 const description =
   "Senior Frontend Engineer with 4+ years building large-scale Angular apps. Explore my projects, skills, and experience — right from the terminal."
 
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     url,
     title,
     description,
-    siteName: "Moemen Ali Portfolio",
+    siteName: "Mo'men El-Sayeh Portfolio",
     images: [{ url: "/preview.png", width: 1200, height: 630 }],
   },
   twitter: {
