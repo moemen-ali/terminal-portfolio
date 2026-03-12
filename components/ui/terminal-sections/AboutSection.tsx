@@ -1,5 +1,5 @@
 const fields = [
-  { label: 'Name',     value: 'Moemen Ali' },
+  { label: 'Name',     value: 'Mo\'men El-Sayeh' },
   { label: 'Role',     value: 'Senior Frontend Engineer' },
   { label: 'Location', value: 'Egypt' },
   { label: 'Status',   value: 'Open to new opportunities' },
