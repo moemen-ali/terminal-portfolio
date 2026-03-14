@@ -5,14 +5,14 @@ export function ContactSection() {
     <div className="space-y-3">
       <p className="text-green-400 font-bold">[CONTACT INFORMATION]</p>
       <div className="space-y-1">
-        {contactLinks.map(({ label, display, href }) => (
+        {contactLinks.map(({ label, display, href, color }) => (
           <div key={label} className="flex gap-2">
             <span className="text-cyan-400 w-20 shrink-0">{label}:</span>
             <a
               href={href}
               target={href.startsWith('mailto') ? undefined : '_blank'}
               rel="noopener noreferrer"
-              className="text-gray-300 hover:text-cyan-300 hover:underline transition-colors"
+              className={`${color} hover:underline transition-colors`}
             >
               {display}
             </a>
