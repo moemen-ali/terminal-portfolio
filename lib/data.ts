@@ -236,7 +236,6 @@ export type ContactLink = {
   label: string
   href: string
   display: string
-  color: string
 }
 
 export const contactLinks: ContactLink[] = [
@@ -244,25 +243,21 @@ export const contactLinks: ContactLink[] = [
     label: 'Email',
     href: 'mailto:moemenelsayeh@gmail.com',
     display: 'moemenelsayeh@gmail.com',
-    color: 'text-cyan-400',
   },
   {
     label: 'GitHub',
     href: 'https://github.com/moemen-ali',
     display: 'github.com/moemen-ali',
-    color: 'text-cyan-400',
   },
   {
     label: 'LinkedIn',
     href: 'https://linkedin.com/in/moemenelsayeh',
     display: 'linkedin.com/in/moemenelsayeh',
-    color: 'text-cyan-400',
   },
   {
     label: 'Blog',
     href: 'https://dev.to/moemenali',
     display: 'dev.to/moemenali',
-    color: 'text-purple-400',
   },
 ]
 

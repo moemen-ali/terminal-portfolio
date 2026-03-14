@@ -12,8 +12,8 @@ export function ExperienceSection() {
             <span className="text-cyan-400 font-semibold">{job.title}</span>
           </p>
           <p className="text-white font-semibold">{job.company}</p>
-          {job.bullets.map((bullet) => (
-            <p key={bullet} className="text-gray-300 pl-2">• {bullet}</p>
+          {job.bullets.map((bullet, index) => (
+            <p key={index} className="text-gray-300 pl-2">• {bullet}</p>
           ))}
         </div>
       ))}

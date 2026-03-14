@@ -14,8 +14,8 @@ export function ProjectsSection() {
           <p className="text-gray-500 pl-4">
             Stack: <span className="text-gray-400">{project.stack}</span>
           </p>
-          {project.bullets.map((bullet) => (
-            <p key={bullet} className="text-gray-300 pl-4">• {bullet}</p>
+          {project.bullets.map((bullet, index) => (
+            <p key={index} className="text-gray-300 pl-4">• {bullet}</p>
           ))}
           {project.challenge && (
             <p className="text-yellow-400 pl-4 pt-1">
