@@ -8,8 +8,11 @@ const helpCommands = [
   { cmd: 'experience', desc: 'Display work history' },
   { cmd: 'education',  desc: 'View educational background' },
   { cmd: 'contact',    desc: 'Show contact information' },
-  { cmd: 'clear',      desc: 'Clear terminal screen' },
-  { cmd: 'help',       desc: 'Display this help message' },
+  { cmd: 'metrics',      desc: 'Key engineering metrics from production work' },
+  { cmd: 'blog',         desc: 'Published articles & writing on dev.to' },
+  { cmd: 'architecture', desc: 'Architecture diagrams and engineering patterns' },
+  { cmd: 'clear',        desc: 'Clear terminal screen' },
+  { cmd: 'help',         desc: 'Display this help message' },
 ]
 
 type Props = {

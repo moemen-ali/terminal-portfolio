@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(npx shadcn@latest init -d)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "WebFetch(domain:dev.to)",
+      "Bash(npm run:*)"
     ]
   }
 }

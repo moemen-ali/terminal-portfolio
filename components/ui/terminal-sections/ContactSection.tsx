@@ -1,25 +1,11 @@
-const contactLinks = [
-  {
-    label: 'Email',
-    display: 'moemenelsayeh@gmail.com',
-    href: 'mailto:moemenelsayeh@gmail.com',
-  },
-  {
-    label: 'GitHub',
-    display: 'github.com/moemen-ali',
-    href: 'https://github.com/moemen-ali',
-  },
-  {
-    label: 'LinkedIn',
-    display: 'linkedin.com/in/moemenelsayeh',
-    href: 'https://linkedin.com/in/moemenelsayeh/',
-  },
-]
+import { contactLinks, contactInfo } from '@/lib/data'
 
-const contactInfo = [
-  { label: 'Phone',    value: '(+20) 109 259 4104' },
-  { label: 'Location', value: 'Egypt' },
-]
+const linkColorMap: Record<string, string> = {
+  Email:    'text-cyan-400',
+  GitHub:   'text-cyan-400',
+  LinkedIn: 'text-cyan-400',
+  Blog:     'text-purple-400',
+}
 
 export function ContactSection() {
   return (
@@ -33,7 +19,7 @@ export function ContactSection() {
               href={href}
               target={href.startsWith('mailto') ? undefined : '_blank'}
               rel="noopener noreferrer"
-              className="text-gray-300 hover:text-cyan-300 hover:underline transition-colors"
+              className={`${linkColorMap[label] ?? 'text-cyan-400'} hover:underline transition-colors`}
             >
               {display}
             </a>

@@ -9,6 +9,9 @@ import { SkillsSection } from './terminal-sections/SkillsSection'
 import { ExperienceSection } from './terminal-sections/ExperienceSection'
 import { EducationSection } from './terminal-sections/EducationSection'
 import { ContactSection } from './terminal-sections/ContactSection'
+import { MetricsSection }      from '@/components/ui/terminal-sections/MetricsSection'
+import { BlogSection }         from '@/components/ui/terminal-sections/BlogSection'
+import { ArchitectureSection } from '@/components/ui/terminal-sections/ArchitectureSection'
 import { CommandDropdown } from './CommandDropdown'
 import { findClosestCommand } from '../../lib/fuzzy-match'
 
@@ -24,6 +27,7 @@ type Mode = 'normal' | 'awaiting-confirmation'
 // 'help' and 'clear' are handled as special cases in runCommand.
 const ALL_COMMAND_NAMES = [
   'help', 'about', 'projects', 'skills', 'experience', 'education', 'contact', 'clear',
+  'metrics', 'blog', 'architecture',
 ]
 
 // Static component factories — defined outside component to avoid re-creation on render.
@@ -33,8 +37,11 @@ const STATIC_COMMANDS: Record<string, () => ReactNode> = {
   'projects':   () => <ProjectsSection />,
   'skills':     () => <SkillsSection />,
   'experience': () => <ExperienceSection />,
-  'education':  () => <EducationSection />,
-  'contact':    () => <ContactSection />,
+  'education':     () => <EducationSection />,
+  'contact':       () => <ContactSection />,
+  'metrics':       () => <MetricsSection />,
+  'blog':          () => <BlogSection />,
+  'architecture':  () => <ArchitectureSection />,
 }
 
 export default function PortfolioTerminal() {
