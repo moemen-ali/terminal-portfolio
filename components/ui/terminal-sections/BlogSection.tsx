@@ -27,8 +27,8 @@ export function BlogSection() {
           dev.to/moemenali
         </a>
       </p>
-      {articles.map((article, index) => (
-        <div key={index} className="space-y-1">
+      {articles.map((article) => (
+        <div key={article.title} className="space-y-1">
           <div className="flex items-start gap-3">
             <span className={`text-xs font-mono shrink-0 pt-0.5 ${statusColors[article.status]}`}>
               {statusLabel[article.status]}
