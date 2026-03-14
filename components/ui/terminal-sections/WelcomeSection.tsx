@@ -24,7 +24,7 @@ export function WelcomeSection() {
         </p>
         <p className="text-gray-300">
           <span className="text-cyan-400">Status:   </span>{' '}
-          <span className="text-green-400 animate-pulse">●</span> Open to Senior / Lead roles
+          <span className="text-green-400 animate-pulse">●</span> Open to Senior roles
         </p>
       </div>
       <p className="text-gray-500 pt-1">
